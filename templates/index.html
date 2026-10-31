@@ -1,0 +1,128 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocOrganizer</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header>
+    <h1>DocOrganizer</h1>
+    <p>All your important documents, in one place.</p>
+</header>
+
+<main>
+    <section class="welcome">
+        <h2>Your document dashboard</h2>
+        <p>Upload, organize and find your documents easily.</p>
+        <div class="stats">
+            <div class="stat">
+                <span>Total documents</span>
+                <strong>{{ total }}</strong>
+            </div>
+            <div class="stat">
+                <span>Categories used</span>
+                <strong>{{ categories_count }}</strong>
+            </div>
+        </div>
+    </section>
+
+    {% for kind, message in get_flashed_messages(with_categories=true) %}
+        <div class="message {{ kind }}">{{ message }}</div>
+    {% endfor %}
+
+    <section class="panel">
+        <h2>Upload a document</h2>
+        <form action="{{ url_for('upload') }}" method="POST"
+              enctype="multipart/form-data">
+            <label for="document">Choose file (max 10 MB)</label>
+            <input id="document" type="file" name="document"
+                   accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" required>
+
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="">Select category</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}">{{ cat }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Upload document</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>My documents</h2>
+        <form class="filters" action="{{ url_for('home') }}" method="GET">
+            <input type="search" name="q" value="{{ query }}"
+                   placeholder="Search filename...">
+            <select name="category">
+                <option value="">All categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}"
+                        {% if selected_category == cat %}selected{% endif %}>
+                        {{ cat }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit">Search</button>
+            <a class="clear" href="{{ url_for('home') }}">Clear</a>
+        </form>
+
+        {% if documents %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for doc in documents %}
+                    <tr>
+                        <td>{{ doc["original_name"] }}</td>
+                        <td>{{ doc["category"] }}</td>
+                        <td>{{ doc["file_type"]|upper }}</td>
+                        <td>{{ doc["file_size"]|filesize }}</td>
+                        <td>{{ doc["upload_date"] }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('download', doc_id=doc['id']) }}">
+                                Download
+                            </a>
+
+                            <details>
+                                <summary>Rename</summary>
+                                <form action="{{ url_for('rename', doc_id=doc['id']) }}"
+                                      method="POST">
+                                    <input name="new_name" required
+                                           value="{{ doc['original_name'] }}">
+                                    <button type="submit">Save name</button>
+                                </form>
+                            </details>
+
+                            <form action="{{ url_for('delete', doc_id=doc['id']) }}"
+                                  method="POST"
+                                  onsubmit="return confirm('Permanently delete this document?')">
+                                <button class="delete" type="submit">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="empty">No documents found. Upload a file or change your filters.</p>
+        {% endif %}
+    </section>
+</main>
+<footer>Digital Document Organizer · </footer>
+</body>
+</html>
