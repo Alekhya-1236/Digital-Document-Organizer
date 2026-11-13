@@ -22,34 +22,48 @@ from werkzeug.utils import secure_filename
 # 1. FLASK CONFIGURATION
 # --------------------------------------------------
 
-app = Flask(__name__)
 
-app.secret_key = os.environ.get(
-    "SECRET_KEY",
-    "local-development-key-change-before-deployment"
-)
+app = Flask(__name__)
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-DATABASE = os.path.join(BASE_DIR, "documents.db")
+# Railway persistent volume directory.
+# Locally, use the project folder.
+DATA_DIR = os.environ.get("DATA_DIR", BASE_DIR)
+
+os.makedirs(DATA_DIR, exist_ok=True)
+
+UPLOAD_FOLDER = os.path.join(DATA_DIR, "uploads")
+DATABASE = os.path.join(DATA_DIR, "documents.db")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Secret key configuration
+SECRET_KEY = os.environ.get("SECRET_KEY")
+
+if not SECRET_KEY and os.environ.get("APP_ENV") == "production":
+    raise RuntimeError("SECRET_KEY must be configured in production.")
+
+app.secret_key = SECRET_KEY or "local-development-key-change-before-deployment"
 
 app.config.update(
     UPLOAD_FOLDER=UPLOAD_FOLDER,
     MAX_CONTENT_LENGTH=10 * 1024 * 1024,
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax"
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("APP_ENV") == "production"
 )
-
+# Flask-Login configuration
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 login_manager.login_view = "login"
 login_manager.login_message = "Please log in to access your dashboard."
 login_manager.login_message_category = "error"
 
+# CSRF protection
 csrf = CSRFProtect(app)
+
 
 
 # --------------------------------------------------
@@ -577,7 +591,18 @@ def too_large(error):
 # 17. START APPLICATION
 # --------------------------------------------------
 
+# --------------------------------------------------
+# 17. HEALTH CHECK AND START APPLICATION
+# --------------------------------------------------
+
+@app.route("/health")
+def health():
+    return {"status": "healthy"}, 200
+
+
 init_db()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        debug=os.environ.get("FLASK_DEBUG") == "1"
+    )
