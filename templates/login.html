@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | DocOrganizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header>
+    <h1>DocOrganizer</h1>
+    <p>Your personal document management space.</p>
+</header>
+
+<main class="auth-container">
+    <section class="panel auth-panel">
+        <h2>Welcome Back!</h2>
+        <p>Log in to access your documents.</p>
+
+        {% for kind, message in get_flashed_messages(with_categories=true) %}
+            <div class="message {{ kind }}">{{ message }}</div>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email"
+                   placeholder="Enter your email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password"
+                   placeholder="Enter your password" required>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <p class="auth-link">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Create Account</a>
+        </p>
+    </section>
+</main>
+
+<footer>Digital Document Organizer</footer>
+
+</body>
+</html>

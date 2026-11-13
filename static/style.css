@@ -347,3 +347,92 @@ body {
 header {
     width: 100%;
 }
+
+/* Authentication Pages */
+
+.auth-container {
+    max-width: 520px;
+    margin: 40px auto;
+    padding: 0 16px;
+}
+
+.auth-panel {
+    padding: 32px;
+}
+
+.auth-panel > p {
+    color: var(--muted);
+}
+
+.auth-link {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.auth-link a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 650px) {
+    .auth-container {
+        margin: 20px auto;
+    }
+
+    .auth-panel {
+        padding: 22px;
+    }
+}
+
+/* Dashboard Header and Authentication */
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+}
+
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.user-section span {
+    font-weight: 600;
+    color: white;
+}
+
+.user-section form {
+    display: block;
+}
+
+.logout-btn {
+    background: white;
+    color: var(--primary);
+    padding: 9px 18px;
+}
+
+.logout-btn:hover {
+    background: #eff6ff;
+}
+
+@media (max-width: 650px) {
+    .header-content {
+        align-items: flex-start;
+    }
+
+    .user-section {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
